@@ -489,9 +489,13 @@ Dim row As Long
 Dim s As String
 Dim r As Excel.Range
 Dim v As Variant
-Dim dt As Date
 Dim dts As String
+Dim dti As Long
+Dim dtiStart As Long
+Dim dtiEnd As Long
 
+    dtiStart = Year(dtStart) * 100 + Month(dtStart)
+    dtiEnd = Year(dtEnd) * 100 + Month(dtEnd)
     Set dictPlannedActComp2 = New Scripting.Dictionary
     Set dictPlannedActComp = New Scripting.Dictionary
     Set sheet = sheetPAC
@@ -506,11 +510,8 @@ Dim dts As String
             s = sheet.Cells(row, 4)
             If Len(s) = 0 Then Exit Sub
             dts = sheet.Cells(row, 8)
-            dt = DateSerial( _
-                CLng(Left$(dts, 4)), _
-                CLng(Right$(dts, 2)), _
-                1)
-            If dt >= dtStart Then
+            dti = CLng(dts)
+            If dti >= dtiStart Then
                 v = sheet.Cells(row, 9)
                 If IsNumeric(v) Then
                     v = CDbl(v)
@@ -522,7 +523,7 @@ Dim dts As String
                 Else
                     dictPlannedActComp.Add s, v
                 End If
-                If dt <= dtEnd Then
+                If dti <= dtiEnd Then
                     If dictPlannedActComp2.Exists(s) Then
                         dictPlannedActComp2(s) = v + dictPlannedActComp2(s)
                     Else
@@ -647,9 +648,13 @@ Dim row As Long
 Dim s As String
 Dim r As Excel.Range
 Dim v As Variant
-Dim dt As Date
 Dim dts As String
+Dim dti As Long
+Dim dtiStart As Long
+Dim dtiEnd As Long
 
+    dtiStart = Year(dtStart) * 100 + Month(dtStart)
+    dtiEnd = Year(dtEnd) * 100 + Month(dtEnd)
     Set dictPlannedActComp2 = New Scripting.Dictionary
     Set dictPlannedActComp = New Scripting.Dictionary
     Set sheet = sheetPAC
@@ -664,11 +669,8 @@ Dim dts As String
             s = sheet.Cells(row, 4)
             If Len(s) = 0 Then Exit Sub
             dts = sheet.Cells(row, 8)
-            dt = DateSerial( _
-                CLng(Left$(dts, 4)), _
-                CLng(Right$(dts, 2)), _
-                1)
-            If dt >= dtStart Then
+            dti = CLng(dts)
+            If dti >= dtiStart Then
                 v = sheet.Cells(row, 14)
                 If IsNumeric(v) Then
                     v = CDbl(v)
@@ -680,7 +682,7 @@ Dim dts As String
                 Else
                     dictPlannedActComp.Add s, v
                 End If
-                If dt <= dtEnd Then
+                If dti <= dtiEnd Then
                     If dictPlannedActComp.Exists(s) Then
                         dictPlannedActComp(s) = v + dictPlannedActComp(s)
                     Else
@@ -692,7 +694,6 @@ Dim dts As String
         row = row + 1
     Loop
 End Sub
-
 
 
 
