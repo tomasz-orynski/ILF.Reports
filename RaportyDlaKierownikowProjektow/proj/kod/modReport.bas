@@ -683,10 +683,10 @@ Dim dtiEnd As Long
                     dictPlannedActComp.Add s, v
                 End If
                 If dti <= dtiEnd Then
-                    If dictPlannedActComp.Exists(s) Then
-                        dictPlannedActComp(s) = v + dictPlannedActComp(s)
+                    If dictPlannedActComp2.Exists(s) Then
+                        dictPlannedActComp2(s) = v + dictPlannedActComp2(s)
                     Else
-                        dictPlannedActComp.Add s, v
+                        dictPlannedActComp2.Add s, v
                     End If
                 End If
             End If
