@@ -253,12 +253,6 @@ Dim borderWeight As XlBorderWeight
         .TintAndShade = 0
         .Weight = borderWeight
     End With
-    'With Selection.Borders(xlEdgeTop)
-    '    .LineStyle = xlContinuous
-    '    .ColorIndex = 0
-    '    .TintAndShade = 0
-    '    .Weight = borderWeight
-    'End With
     With Selection.Borders(xlEdgeBottom)
         .LineStyle = xlContinuous
         .ColorIndex = 0
@@ -271,18 +265,6 @@ Dim borderWeight As XlBorderWeight
         .TintAndShade = 0
         .Weight = borderWeight
     End With
-    'With Selection.Borders(xlInsideVertical)
-    '    .LineStyle = xlContinuous
-    '    .ColorIndex = 0
-    '    .TintAndShade = 0
-    '    .Weight = borderWeight
-    'End With
-    'With Selection.Borders(xlInsideHorizontal)
-    '    .LineStyle = xlContinuous
-    '    .ColorIndex = 0
-    '    .TintAndShade = 0
-    '    .Weight = borderWeight
-    'End With
 End Sub
 
 Private Sub SendReport(path As String, title As String, info As String, addr As String)
