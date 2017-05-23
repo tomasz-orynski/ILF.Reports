@@ -46,8 +46,9 @@ Dim emplName As Variant
 Dim dictConsumed As Scripting.Dictionary
 Dim dictTotalBudget As Scripting.Dictionary
 Dim dictTotalMH As Scripting.Dictionary
-Dim dictPlannedActComp2 As Scripting.Dictionary
 Dim dictPlannedActComp As Scripting.Dictionary
+Dim dictPlannedActComp2 As Scripting.Dictionary
+Dim dictPlannedActCompE As Scripting.Dictionary
 
     Set team = data.DictProjectTeams(teamKey)
     title = "Raport z dnia " & Format(Now, "YYYYMMDDhhmmss") & " dla kierownika pionu " & team.DivisionLeader & " za okres " & Format$(data.dtStart, "YYYYMMDD") & "-" & Format$(data.dtEnd, "YYYYMMDD")
@@ -67,8 +68,8 @@ Dim dictPlannedActComp As Scripting.Dictionary
     eWorkSheet.Range("C7").Value = team.TeamLeader
     eWorkSheet.Range("C8").Value = team.DivisionLeader
     
-    cnt = team.DictEmployees.Count * data.DictProjects.Count - 2
-    row = 16
+    cnt = team.DictEmployees.Count * data.DictProjects.Count - 1
+    row = 17
     While cnt > 0
         eWorkSheet.Rows(row + 1).Select
         Selection.EntireRow.Insert
@@ -83,6 +84,7 @@ Dim dictPlannedActComp As Scripting.Dictionary
         Call ReadProjectTeamEmployees_TotalBudget(teamKey, projName, data.dtStart, dictTotalBudget)
         Call ReadProjectTeamEmployees_ConsumedAndTotalMH(teamKey, projName, data.dtStart, data.dtEnd, dictConsumed, dictTotalMH)
         Call ReadProjectTeamEmployees_PlannedActComp(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActComp2, dictPlannedActComp)
+        Call ReadProjectTeamEmployees_PlannedActCompE(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActCompE)
         For Each emplName In team.DictEmployees.Keys
             eWorkSheet.Range("B" & row).Value = projName
             eWorkSheet.Range("C" & row).Value = emplName
@@ -108,8 +110,8 @@ Dim dictPlannedActComp As Scripting.Dictionary
             Else
                 eWorkSheet.Range("I" & row).Value = 0
             End If
-            If dictPlannedActComp.Exists(emplName) Then
-                eWorkSheet.Range("L" & row).Value = dictPlannedActComp(emplName)
+            If dictPlannedActCompE.Exists(emplName) Then
+                eWorkSheet.Range("L" & row).Value = dictPlannedActCompE(emplName)
             Else
                 eWorkSheet.Range("L" & row).Value = 0
             End If
@@ -118,61 +120,23 @@ Dim dictPlannedActComp As Scripting.Dictionary
         Next
     Next
     
-    eWorkSheet.Range("B15:O" & row - 1).Select
+    eWorkSheet.Range("B16:O" & row - 1).Select
     Application.CutCopyMode = False
     Selection.Subtotal GroupBy:=1, Function:=xlSum, _
         TotalList:=Array(3, 4, 5, 7, 8, 10, 11, 12, 13), _
         Replace:=True, PageBreaks:=False, SummaryBelowData:=True
     
-    cnt = (team.DictEmployees.Count + 1) * data.DictProjects.Count + 16
-    eWorkSheet.Range("B14:O" & cnt).Select
-    Selection.Borders(xlDiagonalDown).LineStyle = xlNone
-    Selection.Borders(xlDiagonalUp).LineStyle = xlNone
-    With Selection.Borders(xlEdgeLeft)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeTop)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeBottom)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeRight)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlInsideVertical)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlInsideHorizontal)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    
+    cnt = (team.DictEmployees.Count + 1) * data.DictProjects.Count + 17
     eWorkSheet.Rows(cnt).Select
     Selection.Delete
-  
+    eWorkSheet.Rows(cnt).Select
+    Selection.Delete
+    
+      
     
     
-    
-    row2 = cnt + 5
-    cnt = team.DictEmployees.Count * data.DictProjects.Count - 2
+    row2 = cnt + 6
+    cnt = team.DictEmployees.Count * data.DictProjects.Count - 1
     row = row2
     While cnt > 0
         eWorkSheet.Rows(row + 1).Select
@@ -188,6 +152,7 @@ Dim dictPlannedActComp As Scripting.Dictionary
         Call ReadProjectTeamEmployees_TotalBudget2(teamKey, projName, data.dtStart, dictTotalBudget)
         Call ReadProjectTeamEmployees_ConsumedAndTotalMH2(teamKey, projName, data.dtStart, data.dtEnd, dictConsumed, dictTotalMH)
         Call ReadProjectTeamEmployees_PlannedActComp2(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActComp2, dictPlannedActComp)
+        Call ReadProjectTeamEmployees_PlannedActCompE2(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActCompE)
         For Each emplName In team.DictEmployees.Keys
             eWorkSheet.Range("B" & row).Value = projName
             eWorkSheet.Range("C" & row).Value = emplName
@@ -213,8 +178,8 @@ Dim dictPlannedActComp As Scripting.Dictionary
             Else
                 eWorkSheet.Range("I" & row).Value = 0
             End If
-            If dictPlannedActComp.Exists(emplName) Then
-                eWorkSheet.Range("L" & row).Value = dictPlannedActComp(emplName)
+            If dictPlannedActCompE.Exists(emplName) Then
+                eWorkSheet.Range("L" & row).Value = dictPlannedActCompE(emplName)
             Else
                 eWorkSheet.Range("L" & row).Value = 0
             End If
@@ -230,47 +195,12 @@ Dim dictPlannedActComp As Scripting.Dictionary
         Replace:=True, PageBreaks:=False, SummaryBelowData:=True
     
     cnt = (team.DictEmployees.Count + 1) * data.DictProjects.Count + row2
-    eWorkSheet.Range("B" & row2 - 2 & ":O" & cnt).Select
-    Selection.Borders(xlDiagonalDown).LineStyle = xlNone
-    Selection.Borders(xlDiagonalUp).LineStyle = xlNone
-    With Selection.Borders(xlEdgeLeft)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeTop)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeBottom)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeRight)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlInsideVertical)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlInsideHorizontal)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
+    eWorkSheet.Rows(cnt).Select
+    Selection.Delete
+    eWorkSheet.Rows(cnt).Select
+    Selection.Delete
     
-    row = 16
+    row = 17
     While row < cnt + 2
         s = eWorkSheet.Cells(row, 2)
         If InStr(1, s, "Sum") > 0 Then
@@ -290,8 +220,12 @@ Dim dictPlannedActComp As Scripting.Dictionary
         row = row + 1
     Wend
     
-    eWorkSheet.Rows(cnt).Select
-    Selection.Delete
+    eWorkSheet.Range("B" & cnt - 1 & ":O" & cnt - 1).Select
+    MakeBorders
+    cnt = (team.DictEmployees.Count + 1) * data.DictProjects.Count + 17
+    eWorkSheet.Range("B" & cnt - 1 & ":O" & cnt - 1).Select
+    MakeBorders
+    eWorkSheet.Range("A1").Select
     
     eWorkSheet.Outline.ShowLevels 2
     eWorkSheet.Calculate
@@ -305,6 +239,50 @@ Dim dictPlannedActComp As Scripting.Dictionary
     eWorkbook.Close False
     Set eWorkbook = Nothing
     SendReport path, title, info, team.DivisionLeaderEmail
+End Sub
+
+Private Sub MakeBorders()
+Dim borderWeight As XlBorderWeight
+
+    borderWeight = XlBorderWeight.xlMedium
+    Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+    Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+    With Selection.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = borderWeight
+    End With
+    'With Selection.Borders(xlEdgeTop)
+    '    .LineStyle = xlContinuous
+    '    .ColorIndex = 0
+    '    .TintAndShade = 0
+    '    .Weight = borderWeight
+    'End With
+    With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = borderWeight
+    End With
+    With Selection.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = borderWeight
+    End With
+    'With Selection.Borders(xlInsideVertical)
+    '    .LineStyle = xlContinuous
+    '    .ColorIndex = 0
+    '    .TintAndShade = 0
+    '    .Weight = borderWeight
+    'End With
+    'With Selection.Borders(xlInsideHorizontal)
+    '    .LineStyle = xlContinuous
+    '    .ColorIndex = 0
+    '    .TintAndShade = 0
+    '    .Weight = borderWeight
+    'End With
 End Sub
 
 Private Sub SendReport(path As String, title As String, info As String, addr As String)
@@ -536,6 +514,52 @@ Dim dtiEnd As Long
     Loop
 End Sub
 
+Private Sub ReadProjectTeamEmployees_PlannedActCompE(ByVal DivisionName As String, ByVal projName As String, dtStart As Date, dtEnd As Date, _
+    ByRef dictPlannedActCompE As Scripting.Dictionary)
+Dim sheet As Worksheet
+Dim row As Long
+Dim s As String
+Dim r As Excel.Range
+Dim v As Variant
+Dim dts As String
+Dim dti As Long
+Dim dtiStart As Long
+Dim dtiEnd As Long
+
+    dtiStart = Year(dtStart) * 100 + Month(dtStart)
+    dtiEnd = Year(dtEnd) * 100 + Month(dtEnd)
+    Set dictPlannedActCompE = New Scripting.Dictionary
+    Set sheet = sheetPACE
+    
+    Set r = sheet.Range("$A$2:$O$999999")
+    r.AutoFilter
+    r.AutoFilter Field:=12, Criteria1:=DivisionName
+    r.AutoFilter Field:=1, Criteria1:=projName
+    row = 6
+    Do
+        If Not sheet.Rows(row).Hidden Then
+            s = sheet.Cells(row, 4)
+            If Len(s) = 0 Then Exit Sub
+            dts = sheet.Cells(row, 8)
+            dti = CLng(dts) + 1
+            If dti >= dtiStart Then
+                v = sheet.Cells(row, 9)
+                If IsNumeric(v) Then
+                    v = CDbl(v)
+                Else
+                    v = 0
+                End If
+                If dictPlannedActCompE.Exists(s) Then
+                    dictPlannedActCompE(s) = v + dictPlannedActCompE(s)
+                Else
+                    dictPlannedActCompE.Add s, v
+                End If
+            End If
+        End If
+        row = row + 1
+    Loop
+End Sub
+
 
 
 
@@ -683,11 +707,57 @@ Dim dtiEnd As Long
                     dictPlannedActComp.Add s, v
                 End If
                 If dti <= dtiEnd Then
-                    If dictPlannedActComp2.Exists(s) Then
-                        dictPlannedActComp2(s) = v + dictPlannedActComp2(s)
+                    If dictPlannedActComp.Exists(s) Then
+                        dictPlannedActComp(s) = v + dictPlannedActComp(s)
                     Else
-                        dictPlannedActComp2.Add s, v
+                        dictPlannedActComp.Add s, v
                     End If
+                End If
+            End If
+        End If
+        row = row + 1
+    Loop
+End Sub
+
+Private Sub ReadProjectTeamEmployees_PlannedActCompE2(ByVal DivisionName As String, ByVal projName As String, dtStart As Date, dtEnd As Date, _
+    ByRef dictPlannedActCompE As Scripting.Dictionary)
+Dim sheet As Worksheet
+Dim row As Long
+Dim s As String
+Dim r As Excel.Range
+Dim v As Variant
+Dim dts As String
+Dim dti As Long
+Dim dtiStart As Long
+Dim dtiEnd As Long
+
+    dtiStart = Year(dtStart) * 100 + Month(dtStart)
+    dtiEnd = Year(dtEnd) * 100 + Month(dtEnd)
+    Set dictPlannedActCompE = New Scripting.Dictionary
+    Set sheet = sheetPACE
+    
+    Set r = sheet.Range("$A$2:$O$999999")
+    r.AutoFilter
+    r.AutoFilter Field:=12, Criteria1:=DivisionName
+    r.AutoFilter Field:=1, Criteria1:=projName
+    row = 6
+    Do
+        If Not sheet.Rows(row).Hidden Then
+            s = sheet.Cells(row, 4)
+            If Len(s) = 0 Then Exit Sub
+            dts = sheet.Cells(row, 8)
+            dti = CLng(dts) + 1
+            If dti >= dtiStart Then
+                v = sheet.Cells(row, 14)
+                If IsNumeric(v) Then
+                    v = CDbl(v)
+                Else
+                    v = 0
+                End If
+                If dictPlannedActCompE.Exists(s) Then
+                    dictPlannedActCompE(s) = v + dictPlannedActCompE(s)
+                Else
+                    dictPlannedActCompE.Add s, v
                 End If
             End If
         End If
