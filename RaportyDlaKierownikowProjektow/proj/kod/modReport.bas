@@ -90,7 +90,7 @@ Dim dictPlannedActCompE As Scripting.Dictionary
             eWorkSheet.Range("C" & row).Value = emplName
             
             If dictPlannedActComp2.Exists(emplName) Then
-                eWorkSheet.Range("D" & row).Value = dictPlannedActComp2(emplName) / 2
+                eWorkSheet.Range("D" & row).Value = dictPlannedActComp2(emplName)
             Else
                 eWorkSheet.Range("D" & row).Value = 0
             End If
@@ -158,7 +158,7 @@ Dim dictPlannedActCompE As Scripting.Dictionary
             eWorkSheet.Range("C" & row).Value = emplName
             
             If dictPlannedActComp2.Exists(emplName) Then
-                eWorkSheet.Range("D" & row).Value = dictPlannedActComp2(emplName) / 2
+                eWorkSheet.Range("D" & row).Value = dictPlannedActComp2(emplName)
             Else
                 eWorkSheet.Range("D" & row).Value = 0
             End If
@@ -689,10 +689,10 @@ Dim dtiEnd As Long
                     dictPlannedActComp.Add s, v
                 End If
                 If dti <= dtiEnd Then
-                    If dictPlannedActComp.Exists(s) Then
-                        dictPlannedActComp(s) = v + dictPlannedActComp(s)
+                    If dictPlannedActComp2.Exists(s) Then
+                        dictPlannedActComp2(s) = v + dictPlannedActComp2(s)
                     Else
-                        dictPlannedActComp.Add s, v
+                        dictPlannedActComp2.Add s, v
                     End If
                 End If
             End If
