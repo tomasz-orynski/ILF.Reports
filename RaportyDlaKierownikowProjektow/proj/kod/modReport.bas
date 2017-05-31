@@ -31,6 +31,7 @@ Dim v As Variant
 End Sub
 
 Private Sub WriteReport(ByVal teamKey As String, data As clsReportsData)
+Dim v As Variant
 Dim s As String
 Dim path As String
 Dim title As String
@@ -49,9 +50,10 @@ Dim dictTotalMH As Scripting.Dictionary
 Dim dictPlannedActComp As Scripting.Dictionary
 Dim dictPlannedActComp2 As Scripting.Dictionary
 Dim dictPlannedActCompE As Scripting.Dictionary
+Dim delRow As Boolean
 
     Set team = data.DictProjectTeams(teamKey)
-    title = "Raport z dnia " & Format(Now, "YYYYMMDDhhmmss") & " dla kierownika pionu " & team.DivisionLeader & " za okres " & Format$(data.dtStart, "YYYYMMDD") & "-" & Format$(data.dtEnd, "YYYYMMDD")
+    title = "Raport dla kierownika pionu " & team.DivisionLeader & " za okres " & Format$(data.dtStart, "YYYYMMDD") & "-" & Format$(data.dtEnd, "YYYYMMDD")
     info = "W za³¹czeniu raport za okres od " & Format$(data.dtStart, "YYYY-MM-DD") & " do " & Format$(data.dtEnd, "YYYY-MM-DD") & " dla (" & team.DivisionLeader & ")." & vbCrLf _
         & "Proszê o akceptacjê zestawienia przy u¿yciu przycisku confirmed w za³¹czonym pliku oraz wpisywanie swoich uwag."
     
@@ -86,16 +88,19 @@ Dim dictPlannedActCompE As Scripting.Dictionary
         Call ReadProjectTeamEmployees_PlannedActComp(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActComp2, dictPlannedActComp)
         Call ReadProjectTeamEmployees_PlannedActCompE(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActCompE)
         For Each emplName In team.DictEmployees.Keys
+            delRow = True
             eWorkSheet.Range("B" & row).Value = projName
             eWorkSheet.Range("C" & row).Value = emplName
             
             If dictPlannedActComp2.Exists(emplName) Then
                 eWorkSheet.Range("D" & row).Value = dictPlannedActComp2(emplName)
+                delRow = delRow And dictPlannedActComp2(emplName) = 0
             Else
                 eWorkSheet.Range("D" & row).Value = 0
             End If
             If dictConsumed.Exists(emplName) Then
                 eWorkSheet.Range("E" & row).Value = dictConsumed(emplName)
+                delRow = delRow And dictConsumed(emplName) = 0
             Else
                 eWorkSheet.Range("E" & row).Value = 0
             End If
@@ -112,32 +117,24 @@ Dim dictPlannedActCompE As Scripting.Dictionary
             End If
             If dictPlannedActCompE.Exists(emplName) Then
                 eWorkSheet.Range("L" & row).Value = dictPlannedActCompE(emplName)
+                delRow = delRow And dictPlannedActCompE(emplName) = 0
             Else
                 eWorkSheet.Range("L" & row).Value = 0
             End If
             
-            row = row + 1
+            If delRow Then
+                eWorkSheet.Rows(row).Select
+                Selection.Delete
+            Else
+                row = row + 1
+            End If
         Next
     Next
     
-    eWorkSheet.Range("B16:O" & row - 1).Select
-    Application.CutCopyMode = False
-    Selection.Subtotal GroupBy:=1, Function:=xlSum, _
-        TotalList:=Array(3, 4, 5, 7, 8, 10, 11, 12, 13), _
-        Replace:=True, PageBreaks:=False, SummaryBelowData:=True
-    
-    cnt = (team.DictEmployees.Count + 1) * data.DictProjects.Count + 17
-    eWorkSheet.Rows(cnt).Select
-    Selection.Delete
-    eWorkSheet.Rows(cnt).Select
-    Selection.Delete
-    
-      
-    
-    
-    row2 = cnt + 6
-    cnt = team.DictEmployees.Count * data.DictProjects.Count - 1
+    row2 = MakeTable(eWorkSheet, 17, row) + 7
     row = row2
+    
+    cnt = team.DictEmployees.Count * data.DictProjects.Count - 1
     While cnt > 0
         eWorkSheet.Rows(row + 1).Select
         Selection.EntireRow.Insert
@@ -154,16 +151,19 @@ Dim dictPlannedActCompE As Scripting.Dictionary
         Call ReadProjectTeamEmployees_PlannedActComp2(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActComp2, dictPlannedActComp)
         Call ReadProjectTeamEmployees_PlannedActCompE2(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActCompE)
         For Each emplName In team.DictEmployees.Keys
+            delRow = True
             eWorkSheet.Range("B" & row).Value = projName
             eWorkSheet.Range("C" & row).Value = emplName
             
             If dictPlannedActComp2.Exists(emplName) Then
                 eWorkSheet.Range("D" & row).Value = dictPlannedActComp2(emplName)
+                delRow = delRow And dictPlannedActComp2(emplName) = 0
             Else
                 eWorkSheet.Range("D" & row).Value = 0
             End If
             If dictConsumed.Exists(emplName) Then
                 eWorkSheet.Range("E" & row).Value = dictConsumed(emplName)
+                delRow = delRow And dictConsumed(emplName) = 0
             Else
                 eWorkSheet.Range("E" & row).Value = 0
             End If
@@ -180,28 +180,66 @@ Dim dictPlannedActCompE As Scripting.Dictionary
             End If
             If dictPlannedActCompE.Exists(emplName) Then
                 eWorkSheet.Range("L" & row).Value = dictPlannedActCompE(emplName)
+                delRow = delRow And dictPlannedActCompE(emplName) = 0
             Else
                 eWorkSheet.Range("L" & row).Value = 0
             End If
             
-            row = row + 1
+            If delRow Then
+                eWorkSheet.Rows(row).Select
+                Selection.Delete
+            Else
+                row = row + 1
+            End If
         Next
     Next
     
-    eWorkSheet.Range("B" & row2 - 1 & ":O" & row - 1).Select
-    Application.CutCopyMode = False
-    Selection.Subtotal GroupBy:=1, Function:=xlSum, _
-        TotalList:=Array(3, 4, 5, 7, 8, 10, 11, 12, 13), _
-        Replace:=True, PageBreaks:=False, SummaryBelowData:=True
+    MakeTable eWorkSheet, row2, row
     
-    cnt = (team.DictEmployees.Count + 1) * data.DictProjects.Count + row2
-    eWorkSheet.Rows(cnt).Select
-    Selection.Delete
-    eWorkSheet.Rows(cnt).Select
-    Selection.Delete
+    eWorkSheet.Range("A1").Select
     
-    row = 17
-    While row < cnt + 2
+    eWorkSheet.Outline.ShowLevels 2
+    eWorkSheet.Calculate
+    eWorkSheet.Cells.Locked = True
+    eWorkSheet.Range("F5:O7").Locked = False
+    'eWorkSheet.Protect "haslo"
+    eWorkbook.CustomDocumentProperties.Item("_SAVE_PATH_").Value = team.SaveEmailPath
+    'eWorkbook.Protect "haslo"
+    path = Workbook.path & "\dokumenty\Raport." & Format(Now, "YYYYMMDDhhmmss") & ".xlsm"
+    eWorkbook.SaveAs Filename:=path, FileFormat:=xlOpenXMLWorkbookMacroEnabled
+    eWorkbook.Close False
+    Set eWorkbook = Nothing
+    SendReport path, title, info, team.DivisionLeaderEmail
+End Sub
+
+Private Function MakeTable(ByVal eWorkSheet As Excel.Worksheet, ByVal rowBeg As Long, ByVal rowEnd As Long) As Long
+Dim row As Long
+Dim s As String
+
+    If rowBeg = rowEnd Then
+        eWorkSheet.Rows(rowBeg).Select
+    Else
+        eWorkSheet.Range("B" & rowBeg - 1 & ":O" & rowEnd - 1).Select
+        Application.CutCopyMode = False
+        Selection.Subtotal GroupBy:=1, Function:=xlSum, _
+            TotalList:=Array(3, 4, 5, 7, 8, 10, 11, 12, 13), _
+            Replace:=True, PageBreaks:=False, SummaryBelowData:=True
+        
+        Do
+            s = eWorkSheet.Cells(rowEnd, 2).Value
+            If Len(s) = 0 Then Exit Do
+            rowEnd = rowEnd + 1
+        Loop
+        rowEnd = rowEnd - 1
+        eWorkSheet.Rows(rowEnd).Select
+        Selection.Delete
+        eWorkSheet.Rows(rowEnd).Select
+    End If
+    Selection.Delete
+    rowEnd = rowEnd - 1
+
+    row = rowBeg
+    While row < rowEnd + 2
         s = eWorkSheet.Cells(row, 2)
         If InStr(1, s, "Sum") > 0 Then
             eWorkSheet.Range("G" & row - 1).Select
@@ -219,27 +257,11 @@ Dim dictPlannedActCompE As Scripting.Dictionary
         End If
         row = row + 1
     Wend
-    
-    eWorkSheet.Range("B" & cnt - 1 & ":O" & cnt - 1).Select
+    eWorkSheet.Range("B" & rowEnd & ":O" & rowEnd).Select
     MakeBorders
-    cnt = (team.DictEmployees.Count + 1) * data.DictProjects.Count + 17
-    eWorkSheet.Range("B" & cnt - 1 & ":O" & cnt - 1).Select
-    MakeBorders
-    eWorkSheet.Range("A1").Select
-    
-    eWorkSheet.Outline.ShowLevels 2
-    eWorkSheet.Calculate
-    eWorkSheet.Cells.Locked = True
-    eWorkSheet.Range("F5:O7").Locked = False
-    'eWorkSheet.Protect "haslo"
-    eWorkbook.CustomDocumentProperties.Item("_SAVE_PATH_").Value = team.SaveEmailPath
-    'eWorkbook.Protect "haslo"
-    path = Workbook.path & "\dokumenty\" & title & ".xlsm"
-    eWorkbook.SaveAs Filename:=path, FileFormat:=xlOpenXMLWorkbookMacroEnabled
-    eWorkbook.Close False
-    Set eWorkbook = Nothing
-    SendReport path, title, info, team.DivisionLeaderEmail
-End Sub
+    MakeTable = rowEnd
+End Function
+
 
 Private Sub MakeBorders()
 Dim borderWeight As XlBorderWeight
