@@ -46,7 +46,7 @@ Dim projName As Variant
 Dim emplName As Variant
 Dim dictConsumed As Scripting.Dictionary
 Dim dictTotalBudget As Scripting.Dictionary
-Dim dictTotalMH As Scripting.Dictionary
+Dim dblTotalMH As Double
 Dim dictPlannedActComp As Scripting.Dictionary
 Dim dictPlannedActComp2 As Scripting.Dictionary
 Dim dictPlannedActCompE As Scripting.Dictionary
@@ -84,7 +84,7 @@ Dim delRow As Boolean
     
     For Each projName In data.DictProjects.Keys
         Call ReadProjectTeamEmployees_TotalBudget(teamKey, projName, data.dtStart, dictTotalBudget)
-        Call ReadProjectTeamEmployees_ConsumedAndTotalMH(teamKey, projName, data.dtStart, data.dtEnd, dictConsumed, dictTotalMH)
+        Call ReadProjectTeamEmployees_ConsumedAndTotalMH(teamKey, projName, data.dtStart, data.dtEnd, dictConsumed, dblTotalMH)
         Call ReadProjectTeamEmployees_PlannedActComp(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActComp2, dictPlannedActComp)
         Call ReadProjectTeamEmployees_PlannedActCompE(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActCompE)
         For Each emplName In team.DictEmployees.Keys
@@ -108,13 +108,8 @@ Dim delRow As Boolean
                 eWorkSheet.Range("H" & row).Value = dictTotalBudget(emplName)
             Else
                 eWorkSheet.Range("H" & row).Value = 0
-                'eWorkSheet.Range("K" & row).Value = "No plan at start"
             End If
-            If dictTotalMH.Exists(emplName) Then
-                eWorkSheet.Range("I" & row).Value = dictTotalMH(emplName)
-            Else
-                eWorkSheet.Range("I" & row).Value = 0
-            End If
+            eWorkSheet.Range("I" & row).Value = dblTotalMH
             If dictPlannedActCompE.Exists(emplName) Then
                 eWorkSheet.Range("L" & row).Value = dictPlannedActCompE(emplName)
                 delRow = delRow And dictPlannedActCompE(emplName) = 0
@@ -147,7 +142,7 @@ Dim delRow As Boolean
     
     For Each projName In data.DictProjects.Keys
         Call ReadProjectTeamEmployees_TotalBudget2(teamKey, projName, data.dtStart, dictTotalBudget)
-        Call ReadProjectTeamEmployees_ConsumedAndTotalMH2(teamKey, projName, data.dtStart, data.dtEnd, dictConsumed, dictTotalMH)
+        Call ReadProjectTeamEmployees_ConsumedAndTotalMH2(teamKey, projName, data.dtStart, data.dtEnd, dictConsumed, dblTotalMH)
         Call ReadProjectTeamEmployees_PlannedActComp2(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActComp2, dictPlannedActComp)
         Call ReadProjectTeamEmployees_PlannedActCompE2(teamKey, projName, data.dtStart, data.dtEnd, dictPlannedActCompE)
         For Each emplName In team.DictEmployees.Keys
@@ -171,13 +166,8 @@ Dim delRow As Boolean
                 eWorkSheet.Range("H" & row).Value = dictTotalBudget(emplName)
             Else
                 eWorkSheet.Range("H" & row).Value = 0
-                'eWorkSheet.Range("K" & row).Value = "No plan at start"
             End If
-            If dictTotalMH.Exists(emplName) Then
-                eWorkSheet.Range("I" & row).Value = dictTotalMH(emplName)
-            Else
-                eWorkSheet.Range("I" & row).Value = 0
-            End If
+            eWorkSheet.Range("I" & row).Value = dblTotalMH
             If dictPlannedActCompE.Exists(emplName) Then
                 eWorkSheet.Range("L" & row).Value = dictPlannedActCompE(emplName)
                 delRow = delRow And dictPlannedActCompE(emplName) = 0
@@ -238,26 +228,37 @@ Dim s As String
     Selection.Delete
     rowEnd = rowEnd - 1
 
-    row = rowBeg
-    While row < rowEnd + 2
+    row = rowEnd
+    While row >= rowBeg
         s = eWorkSheet.Cells(row, 2)
         If InStr(1, s, "Sum") > 0 Then
-            eWorkSheet.Range("G" & row - 1).Select
-            Selection.Copy
-            eWorkSheet.Range("G" & row).Select
-            eWorkSheet.Paste
-            eWorkSheet.Range("J" & row - 1).Select
-            Selection.Copy
-            eWorkSheet.Range("J" & row).Select
-            eWorkSheet.Paste
-            eWorkSheet.Range("O" & row - 1).Select
-            Selection.Copy
-            eWorkSheet.Range("O" & row).Select
-            eWorkSheet.Paste
+            eWorkSheet.Range("G" & row - 1).Copy
+            eWorkSheet.Range("G" & row).PasteSpecial xlPasteAll
+            eWorkSheet.Range("I" & row - 1 & ":J" & row - 1).Copy
+            eWorkSheet.Range("I" & row & ":J" & row).PasteSpecial xlPasteAll
+            eWorkSheet.Range("O" & row - 1).Copy
+            eWorkSheet.Range("O" & row).PasteSpecial xlPasteAll
+        
+            eWorkSheet.Range("H" & row).Copy
+            eWorkSheet.Range("H" & row).PasteSpecial xlPasteValues
+            eWorkSheet.Range("K" & row & ":N" & row).Copy
+            eWorkSheet.Range("K" & row & ":N" & row).PasteSpecial xlPasteValues
+            eWorkSheet.Range("B" & row & ":O" & row).Font.Bold = True
+        Else
+            With eWorkSheet.Range("H" & row & ":K" & row)
+                .ClearContents
+                .ClearFormats
+                .Interior.ColorIndex = 0
+            End With
+            With eWorkSheet.Range("M" & row & ":O" & row)
+                .ClearContents
+                .ClearFormats
+                .Interior.ColorIndex = 0
+            End With
         End If
-        row = row + 1
+        row = row - 1
     Wend
-    eWorkSheet.Range("B" & rowEnd & ":O" & rowEnd).Select
+    eWorkSheet.Range("B" & rowBeg - 3 & ":O" & rowEnd).Select
     MakeBorders
     MakeTable = rowEnd
 End Function
@@ -269,13 +270,19 @@ Dim borderWeight As XlBorderWeight
     borderWeight = XlBorderWeight.xlMedium
     Selection.Borders(xlDiagonalDown).LineStyle = xlNone
     Selection.Borders(xlDiagonalUp).LineStyle = xlNone
-    With Selection.Borders(xlEdgeLeft)
+    With Selection.Borders(xlEdgeTop)
         .LineStyle = xlContinuous
         .ColorIndex = 0
         .TintAndShade = 0
         .Weight = borderWeight
     End With
     With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = borderWeight
+    End With
+    With Selection.Borders(xlEdgeLeft)
         .LineStyle = xlContinuous
         .ColorIndex = 0
         .TintAndShade = 0
@@ -368,7 +375,6 @@ Private Sub ReadProjectTeamEmployees_TotalBudget(ByVal DivisionName As String, B
     ByRef dictTotalBudget As Scripting.Dictionary)
 Dim sheet As Worksheet
 Dim row As Long
-Dim col As Long
 Dim s As String
 Dim r As Excel.Range
 Dim v As Variant
@@ -376,7 +382,6 @@ Dim v As Variant
     Set dictTotalBudget = New Scripting.Dictionary
     Set sheet = sheetMH
     
-    col = 7 + (Year(dt) - 2010) * 12 + Month(dt)
     Set r = sheet.Range("$A$1:$FS$9999")
     r.AutoFilter
     r.AutoFilter Field:=2, Criteria1:=DivisionName
@@ -386,12 +391,6 @@ Dim v As Variant
         If Not sheet.Rows(row).Hidden Then
             s = sheet.Cells(row, 1)
             If Len(s) = 0 Then Exit Sub
-            v = sheet.Cells(row, col)
-            If IsNumeric(v) Then
-                v = CDbl(v)
-            Else
-                v = 0
-            End If
             v = sheet.Cells(row, 7)
             If IsNumeric(v) Then
                 v = CDbl(v)
@@ -410,7 +409,7 @@ End Sub
 
 Private Sub ReadProjectTeamEmployees_ConsumedAndTotalMH(ByVal DivisionName As String, ByVal projName As String, dtStart As Date, dtEnd As Date, _
     ByRef dictConsumed As Scripting.Dictionary, _
-    ByRef dictTotalMH As Scripting.Dictionary)
+    ByRef dblTotalMH As Double)
 Dim sheet As Worksheet
 Dim row As Long
 Dim s As String
@@ -418,8 +417,8 @@ Dim r As Excel.Range
 Dim v As Variant
 Dim dt As Date
 
+    dblTotalMH = 0
     Set dictConsumed = New Scripting.Dictionary
-    Set dictTotalMH = New Scripting.Dictionary
     Set sheet = sheetUMH
     
     Set r = sheet.Range("$A$5:$L$999999")
@@ -448,14 +447,7 @@ Dim dt As Date
             If dt <= dtEnd Then
                 v = sheet.Cells(row, 7)
                 If IsNumeric(v) Then
-                    v = CDbl(v)
-                Else
-                    v = 0
-                End If
-                If dictTotalMH.Exists(s) Then
-                    dictTotalMH(s) = v + dictTotalMH(s)
-                Else
-                    dictTotalMH.Add s, v
+                    dblTotalMH = dblTotalMH + CDbl(v)
                 End If
             End If
         End If
@@ -573,7 +565,6 @@ Private Sub ReadProjectTeamEmployees_TotalBudget2(ByVal DivisionName As String, 
     ByRef dictTotalBudget As Scripting.Dictionary)
 Dim sheet As Worksheet
 Dim row As Long
-Dim col As Long
 Dim s As String
 Dim r As Excel.Range
 Dim v As Variant
@@ -581,7 +572,6 @@ Dim v As Variant
     Set dictTotalBudget = New Scripting.Dictionary
     Set sheet = sheetCost
     
-    col = 7 + (Year(dt) - 2010) * 12 + Month(dt)
     Set r = sheet.Range("$A$1:$FS$9999")
     r.AutoFilter
     r.AutoFilter Field:=2, Criteria1:=DivisionName
@@ -591,12 +581,6 @@ Dim v As Variant
         If Not sheet.Rows(row).Hidden Then
             s = sheet.Cells(row, 1)
             If Len(s) = 0 Then Exit Sub
-            v = sheet.Cells(row, col)
-            If IsNumeric(v) Then
-                v = CDbl(v)
-            Else
-                v = 0
-            End If
             v = sheet.Cells(row, 7)
             If IsNumeric(v) Then
                 v = CDbl(v)
@@ -615,7 +599,7 @@ End Sub
 
 Private Sub ReadProjectTeamEmployees_ConsumedAndTotalMH2(ByVal DivisionName As String, ByVal projName As String, dtStart As Date, dtEnd As Date, _
     ByRef dictConsumed As Scripting.Dictionary, _
-    ByRef dictTotalMH As Scripting.Dictionary)
+    ByRef dblTotalMH As Double)
 Dim sheet As Worksheet
 Dim row As Long
 Dim s As String
@@ -623,8 +607,8 @@ Dim r As Excel.Range
 Dim v As Variant
 Dim dt As Date
 
+    dblTotalMH = 0
     Set dictConsumed = New Scripting.Dictionary
-    Set dictTotalMH = New Scripting.Dictionary
     Set sheet = sheetUMH
     
     Set r = sheet.Range("$A$5:$L$999999")
@@ -653,14 +637,7 @@ Dim dt As Date
             If dt <= dtEnd Then
                 v = sheet.Cells(row, 10)
                 If IsNumeric(v) Then
-                    v = CDbl(v)
-                Else
-                    v = 0
-                End If
-                If dictTotalMH.Exists(s) Then
-                    dictTotalMH(s) = v + dictTotalMH(s)
-                Else
-                    dictTotalMH.Add s, v
+                    dblTotalMH = dblTotalMH + CDbl(v)
                 End If
             End If
         End If
