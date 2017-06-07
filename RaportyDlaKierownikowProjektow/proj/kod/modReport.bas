@@ -244,6 +244,19 @@ Dim s As String
             eWorkSheet.Range("K" & row & ":N" & row).Copy
             eWorkSheet.Range("K" & row & ":N" & row).PasteSpecial xlPasteValues
             eWorkSheet.Range("B" & row & ":O" & row).Font.Bold = True
+            
+            With eWorkSheet.Range("B" & row & ":E" & row)
+                .Interior.Color = &HF0F0F0
+            End With
+            With eWorkSheet.Range("G" & row & ":J" & row)
+                .Interior.Color = &HF0F0F0
+            End With
+            With eWorkSheet.Range("L" & row & ":M" & row)
+                .Interior.Color = &HF0F0F0
+            End With
+            With eWorkSheet.Range("O" & row & ":M" & row)
+                .Interior.Color = &HF0F0F0
+            End With
         Else
             With eWorkSheet.Range("H" & row & ":K" & row)
                 .ClearContents
