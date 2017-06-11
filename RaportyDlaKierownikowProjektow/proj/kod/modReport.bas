@@ -232,19 +232,19 @@ Dim s As String
     While row >= rowBeg
         s = eWorkSheet.Cells(row, 2)
         If InStr(1, s, "Sum") > 0 Then
-            eWorkSheet.Range("G" & row - 1).Copy
-            eWorkSheet.Range("G" & row).PasteSpecial xlPasteAll
-            eWorkSheet.Range("I" & row - 1 & ":J" & row - 1).Copy
-            eWorkSheet.Range("I" & row & ":J" & row).PasteSpecial xlPasteAll
-            eWorkSheet.Range("O" & row - 1).Copy
-            eWorkSheet.Range("O" & row).PasteSpecial xlPasteAll
+            eWorkSheet.Range("F" & row - 1 & ":G" & row - 1).Copy
+            eWorkSheet.Range("F" & row & ":G" & row).PasteSpecial xlPasteAll
+            eWorkSheet.Range("I" & row - 1 & ":K" & row - 1).Copy
+            eWorkSheet.Range("I" & row & ":K" & row).PasteSpecial xlPasteAll
+            eWorkSheet.Range("M" & row - 1 & ":O" & row - 1).Copy
+            eWorkSheet.Range("M" & row & ":O" & row).PasteSpecial xlPasteAll
         
             eWorkSheet.Range("H" & row).Copy
             eWorkSheet.Range("H" & row).PasteSpecial xlPasteValues
-            eWorkSheet.Range("K" & row & ":N" & row).Copy
-            eWorkSheet.Range("K" & row & ":N" & row).PasteSpecial xlPasteValues
-            eWorkSheet.Range("B" & row & ":O" & row).Font.Bold = True
+            eWorkSheet.Range("L" & row).Copy
+            eWorkSheet.Range("L" & row).PasteSpecial xlPasteValues
             
+            eWorkSheet.Range("B" & row & ":O" & row).Font.Bold = True
             With eWorkSheet.Range("B" & row & ":E" & row)
                 .Interior.Color = &HF0F0F0
             End With
